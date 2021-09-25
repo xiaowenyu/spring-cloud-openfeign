@@ -42,6 +42,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(LoadBalancerProperties.class)
 class DefaultFeignLoadBalancerConfiguration {
 
+	// open-feign默认是带负载均衡的客户端
 	@Bean
 	@ConditionalOnMissingBean
 	@Conditional(OnRetryNotEnabledCondition.class)

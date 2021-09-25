@@ -38,6 +38,7 @@ class FeignCircuitBreakerTargeter implements Targeter {
 		this.circuitBreakerNameResolver = circuitBreakerNameResolver;
 	}
 
+	// 封装限流熔断的代理
 	@Override
 	public <T> T target(FeignClientFactoryBean factory, Feign.Builder feign, FeignContext context,
 			Target.HardCodedTarget<T> target) {

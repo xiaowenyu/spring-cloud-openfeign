@@ -366,10 +366,12 @@ public class FeignClientFactoryBean
 	}
 
 	protected <T> T loadBalance(Feign.Builder builder, FeignContext context, HardCodedTarget<T> target) {
+		// 获得加载到的httpClient或者OkHttpClient
 		Client client = getOptional(context, Client.class);
 		if (client != null) {
 			builder.client(client);
 			Targeter targeter = get(context, Targeter.class);
+			// 普通代理或者熔断器代理
 			return targeter.target(this, builder, context, target);
 		}
 
@@ -393,6 +395,7 @@ public class FeignClientFactoryBean
 
 	@Override
 	public Object getObject() {
+		// 获取feignClient代理类的入口
 		return getTarget();
 	}
 
@@ -404,20 +407,25 @@ public class FeignClientFactoryBean
 	<T> T getTarget() {
 		FeignContext context = beanFactory != null ? beanFactory.getBean(FeignContext.class)
 				: applicationContext.getBean(FeignContext.class);
+		// 通过上下文获取builder
 		Feign.Builder builder = feign(context);
 
+		// 没有设置url
 		if (!StringUtils.hasText(url)) {
 
 			if (LOG.isInfoEnabled()) {
 				LOG.info("For '" + name + "' URL not provided. Will try picking an instance via load-balancing.");
 			}
+			//直接用服务名来负载均衡
 			if (!name.startsWith("http")) {
 				url = "http://" + name;
 			}
 			else {
 				url = name;
 			}
+			// 拼接上路径
 			url += cleanPath();
+			//
 			return (T) loadBalance(builder, context, new HardCodedTarget<>(type, name, url));
 		}
 		if (StringUtils.hasText(url) && !url.startsWith("http")) {

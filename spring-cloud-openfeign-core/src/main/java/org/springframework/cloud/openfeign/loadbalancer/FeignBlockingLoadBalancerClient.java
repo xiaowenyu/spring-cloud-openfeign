@@ -51,6 +51,7 @@ import static org.springframework.cloud.openfeign.loadbalancer.LoadBalancerUtils
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
+// 负载均衡的客户端
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class FeignBlockingLoadBalancerClient implements Client {
 
@@ -85,6 +86,7 @@ public class FeignBlockingLoadBalancerClient implements Client {
 						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						RequestDataContext.class, ResponseData.class, ServiceInstance.class);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
+		// 调用loadBalance选择服务
 		ServiceInstance instance = loadBalancerClient.choose(serviceId, lbRequest);
 		org.springframework.cloud.client.loadbalancer.Response<ServiceInstance> lbResponse = new DefaultResponse(
 				instance);
@@ -99,8 +101,11 @@ public class FeignBlockingLoadBalancerClient implements Client {
 			return Response.builder().request(request).status(HttpStatus.SERVICE_UNAVAILABLE.value())
 					.body(message, StandardCharsets.UTF_8).build();
 		}
+		// 重构URL
 		String reconstructedUrl = loadBalancerClient.reconstructURI(instance, originalUri).toString();
+		// 封装新的请求
 		Request newRequest = buildRequest(request, reconstructedUrl);
+		// 执行请求并 触发事件
 		return executeWithLoadBalancerLifecycleProcessing(delegate, options, newRequest, lbRequest, lbResponse,
 				supportedLifecycleProcessors);
 	}
